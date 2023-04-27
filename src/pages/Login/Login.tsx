@@ -1,29 +1,40 @@
+import { useState } from 'react'
 import Button from '@mui/material/Button'
 import CssBaseline from '@mui/material/CssBaseline'
 import TextField from '@mui/material/TextField'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Checkbox from '@mui/material/Checkbox'
-import Link from '@mui/material/Link'
 import Paper from '@mui/material/Paper'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import { Container } from '@mui/material'
+import { loginByAmin } from '@/services/user.service'
+import { useNavigate } from 'react-router-dom'
 
-export default function Login() {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+export default function SignInSide() {
+  const navigate = useNavigate()
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const handleSubmit =async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const data = new FormData(event.currentTarget)
+    try{
+      const user = await loginByAmin({
+        username,
+        password
+      })
+      sessionStorage.setItem('user', JSON.stringify(user))
+      navigate('/')
+    }
+    catch(e){
+      console.warn('err',e)
+    }
   }
 
   return (
     <Container component='main' maxWidth='lg'>
       <Box
         sx={{
-          marginTop: 30
+          marginTop: 8
         }}
-        width='100%'
-        display='flex'
       >
         <Grid container>
           <CssBaseline />
@@ -33,7 +44,8 @@ export default function Login() {
             sm={4}
             md={7}
             sx={{
-              backgroundImage: 'url(https://source.unsplash.com/random)',
+              backgroundImage:
+                'url(https://images.unsplash.com/photo-1493723843671-1d655e66ac1c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTZ8fGFkbWlufGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=800&q=60)',
               backgroundRepeat: 'no-repeat',
               backgroundColor: (t) => (t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900]),
               backgroundSize: 'cover',
@@ -51,18 +63,20 @@ export default function Login() {
               }}
             >
               <Typography component='h1' variant='h5'>
-                Sign in
+                Đăng nhập
               </Typography>
-              <Box component='form' noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
+              <Box component='form' noValidate onSubmit={(e) => handleSubmit(e)} sx={{ mt: 1 }}>
                 <TextField
-                  margin='normal'
+                  margin='normal' 
                   required
                   fullWidth
-                  id='email'
-                  label='Email Address'
-                  name='email'
-                  autoComplete='email'
+                  id='username'
+                  label='Username'
+                  name='username'
+                  autoComplete='username'
                   autoFocus
+                  value={username}
+                  onChange={(e)=>setUsername(e.target.value)}
                 />
                 <TextField
                   margin='normal'
@@ -73,23 +87,12 @@ export default function Login() {
                   type='password'
                   id='password'
                   autoComplete='current-password'
+                  value={password}
+                  onChange={(e)=>setPassword(e.target.value)}
                 />
-                <FormControlLabel control={<Checkbox value='remember' color='primary' />} label='Remember me' />
                 <Button type='submit' fullWidth variant='contained' sx={{ mt: 3, mb: 2 }}>
-                  Sign In
+                  Đăng nhập
                 </Button>
-                <Grid container>
-                  <Grid item xs>
-                    <Link href='#' variant='body2'>
-                      Forgot password?
-                    </Link>
-                  </Grid>
-                  <Grid item>
-                    <Link href='#' variant='body2'>
-                      {"Don't have an account? Sign Up"}
-                    </Link>
-                  </Grid>
-                </Grid>
               </Box>
             </Box>
           </Grid>

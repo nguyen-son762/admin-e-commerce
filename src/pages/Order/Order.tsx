@@ -1,16 +1,29 @@
 import { useEffect, useState } from 'react'
 import CustomTable from '@/components/atoms/CustomTable'
 import DefaultLayout from '@/components/layout/DefaultLayout'
-import { getOrdersByYear } from '@/services/order.service'
+import { getOrdersByYear, updateStatus } from '@/services/order.service'
 import { OrderDef } from '@/types/order.type'
 import { Column } from '@/types/table.typ'
-import { Box, Button, TableCell, TableRow, TextField } from '@mui/material'
+import {
+  Box,
+  Button,
+  FormControl,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  TableCell,
+  TableRow,
+  TextField
+} from '@mui/material'
 import dayjs, { Dayjs } from 'dayjs'
 import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { LocalizationProvider } from '@mui/x-date-pickers'
 import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker'
 import { DateRange } from '@mui/x-date-pickers-pro'
+import { OrderStatusEnums, statusOptions } from '@/constants/order.constants'
+import { useSnackbar } from 'notistack'
+import StatusSelect from './components/StatusSelect'
 
 type OrderRowDef = {
   _id: string
@@ -40,6 +53,8 @@ const Order = () => {
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
   const [date, setDate] = useState<DateRange<Dayjs>>([dayjs(new Date('2020-01-01')), dayjs(new Date())])
+  const { enqueueSnackbar } = useSnackbar()
+
   useEffect(() => {
     getData(1)
   }, [])
@@ -61,6 +76,22 @@ const Order = () => {
   }
   const filterOrders = () => {
     getData(1, date[0], date[1])
+  }
+  const onChangeStatus = (event: SelectChangeEvent<OrderStatusEnums>, item: OrderDef) => {
+    updateStatus({
+      status: event.target.value as OrderStatusEnums,
+      order_id: item._id
+    })
+      .then(() => {
+        enqueueSnackbar('Cập nhật thành công', {
+          variant: 'success'
+        })
+      })
+      .catch(() => {
+        enqueueSnackbar('Cập nhật thất bại', {
+          variant: 'error'
+        })
+      })
   }
 
   return (
@@ -124,7 +155,9 @@ const Order = () => {
                   {dayjs(item.createdAt).format('MM-DD-YYYY')}
                 </p>
               </TableCell>
-              <TableCell align='left'>{item.status}</TableCell>
+              <TableCell align='left'>
+                <StatusSelect value={item.status} order={item} onChangeStatus={onChangeStatus} />
+              </TableCell>
             </TableRow>
           )
         })}

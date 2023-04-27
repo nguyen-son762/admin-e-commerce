@@ -19,3 +19,13 @@ export const updateUser = async(params: Partial<UserDef>)=>{
   const result = await api.patch('auth/update',params)
   return result.data
 }
+
+type LoginByAdminParams = {
+  username: string
+  password: string
+}
+
+export const loginByAmin = async (params: LoginByAdminParams)=>{
+  const result = await api.post('auth/admin/login',params)
+  return result.data
+}
